@@ -39,7 +39,7 @@ This makes it useful for traders, quants, and researchers who need to locate hig
 | --------------------- | -------------------------------------------------------------------------------------------- |
 | `--date-from`         | Start date for processing (format: `YYYY-MM-DD`).                                            |
 | `--date-to`           | End date for processing (format: `YYYY-MM-DD`).                                              |
-| `--path-read-symbols` | Path to file containing the list of market symbols to analyze.                               |
+| `--path-read-symbols` | Path to the folder with files containing the list of market symbols to be analyzed.          |
 | `--interval`          | Time window (in milliseconds) used to measure the price impulse.                             |
 | `--trigger-delta`     | Volatility threshold (in %) over the `interval` that triggers impulse detection.             |
 | `--post-price-time`   | Time (in milliseconds) after an impulse to record the post-event price for later evaluation. |
