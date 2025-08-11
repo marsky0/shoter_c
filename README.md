@@ -59,7 +59,7 @@ This makes it useful for traders, quants, and researchers who need to locate hig
 ## Example CSV Output
 
 ```
-symbol        start_price,         peak_price           post_price
+symbol        start_price          peak_price           post_price
 BANANAS31USDT,0.012767000123858452,0.012876000255346298,0.012845999561250210
 BANANAS31USDT,0.013283999636769295,0.013181000016629696,0.013199999928474426
 BANANAS31USDT,0.014096000231802464,0.014217999763786793,0.014200000092387199
