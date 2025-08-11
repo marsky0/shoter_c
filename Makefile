@@ -1,4 +1,4 @@
-TARGET = bin/shoter
+TARGET = bin/shoter_с
 
 BINDIR = bin
 
@@ -19,6 +19,3 @@ $(TARGET): $(SRCS)
 
 run: $(TARGET)
 	$(TARGET)
-
-clear:
-	rm -f $(TARGET) *.o
