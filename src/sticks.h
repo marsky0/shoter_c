@@ -28,7 +28,7 @@ typedef struct StickData {
     f64 post_price;
 } StickData;
 
-typedef struct StickDataArra {
+typedef struct StickDataArray {
     StickData* data;
 	u64 capacity;
 	u64 length;
