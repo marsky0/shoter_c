@@ -12,7 +12,7 @@ This makes it useful for traders, quants, and researchers who need to locate hig
 
 * **Efficient data access** using HDF5 for large compressed market datasets.
 * **Customizable detection parameters** via command-line arguments.
-* **High-speed processing** with optional CPU core selection.
+* **High-speed processing** with the ability to select the number of CPU cores.
 * **CSV output** for easy integration into analysis pipelines.
 * **Cross-platform** (Linux, macOS, Windows with HDF5 support).
 
