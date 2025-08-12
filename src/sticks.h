@@ -23,6 +23,7 @@ typedef struct StickArray {
 
 typedef struct StickData {
     string symbol;
+    u64 timestamp;
     f64 start_price;
     f64 peak_price;
     f64 post_price;

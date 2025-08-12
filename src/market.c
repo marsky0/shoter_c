@@ -1,4 +1,5 @@
 #include "market.h"
+#include "lib/typedefs.h"
 
 TradesArray read_hdf5(char* path) {
     TradesArray trades_array = {0};
@@ -7,7 +8,7 @@ TradesArray read_hdf5(char* path) {
 
     hsize_t dims[1];
     H5LTget_dataset_info(fid, "id", dims, NULL, NULL);
-    i32 capacity = (i32)dims[0];
+    u64 capacity = (u64)dims[0];
 
     u64* ids = malloc(sizeof(u64) * capacity);
     u64* timestamps = malloc(sizeof(u64) * capacity);

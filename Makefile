@@ -1,4 +1,4 @@
-TARGET = bin/shoter_с
+TARGET = bin/shoter
 
 BINDIR = bin
 
@@ -7,7 +7,7 @@ SRCS = src/*.c src/lib/*.c
 INCLUDES = -I./include/
 
 # unix
-LIBS = -L./lib/ -Wl,-rpath=./lib/ -lhdf5 -lhdf5_hl -lpthread 
+LIBS = -L./lib/ -lhdf5 -lhdf5_hl -lpthread #-Wl,-rpath=./lib/
 
 CC = gcc
 CFLAGS = -g -Wall -O3 -march=native -ffast-math 
@@ -19,3 +19,6 @@ $(TARGET): $(SRCS)
 
 run: $(TARGET)
 	$(TARGET)
+
+clear:
+	rm -f $(TARGET) *.o

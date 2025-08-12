@@ -162,11 +162,13 @@ StickDataArray analysis(string* path, u64 interval, u64 post_price_time, f64 tri
         if (delta >= trigger_delta) {
             if (sticks.sticks[i - 1].avg < s->avg) {
                 data.data[data.length].symbol = symbol;
+                data.data[data.length].timestamp = s->time;
                 data.data[data.length].start_price = sticks.sticks[i-1].low;
                 data.data[data.length].peak_price = s->high;
                 data.data[data.length].post_price = sticks.sticks[i+post_count_sticks].avg;
             } else {
                 data.data[data.length].symbol = symbol;
+                data.data[data.length].timestamp = s->time;
                 data.data[data.length].start_price = sticks.sticks[i-1].high;
                 data.data[data.length].peak_price = s->low;
                 data.data[data.length].post_price = sticks.sticks[i+post_count_sticks].avg;
@@ -290,13 +292,14 @@ int main(int argc, char** argv) {
     }
 
     FILE *file = fopen("data.csv", "w");
-    fprintf(file, "symbol,start_price,peak_price,post_price\n");
+    fprintf(file, "symbol,timestamp,start_price,peak_price,post_price\n");
 
     for (u64 i = 0; i < count_paths; i++) {
         StickDataArray* sda = &targs[i].result;
         for (u64 k = 0; k < sda->length; k++) {
-            fprintf(file, "%s,%.18lf,%.18lf,%.18lf\n",
+            fprintf(file, "%s,%lu,%.18lf,%.18lf,%.18lf\n",
                 sda->data[k].symbol.str,
+                sda->data[k].timestamp,
                 sda->data[k].start_price,
                 sda->data[k].peak_price,
                 sda->data[k].post_price
