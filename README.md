@@ -44,6 +44,7 @@ This makes it useful for traders, quants, and researchers who need to locate hig
 | `--trigger-delta`     | Volatility threshold (in %) over the `interval` that triggers impulse detection.             |
 | `--post-price-time`   | Time (in milliseconds) after an impulse to record the post-event price for later evaluation. |
 | `--cpu`               | CPU core index to bind the process for optimized performance.                                |
+| `--validate-files`    | Validates files and removes broken ones.													   |
 
 ---
 

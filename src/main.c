@@ -202,6 +202,7 @@ int main(int argc, char** argv) {
     u64 interval = 150;
     u64 post_price_time = 1000;
     f64 trigger_delta = 0.5;
+    u8 validate_files = false; 
 
     for (u32 i=0; i < argc; i++) {
         if (!strcmp("--path-read-symbols", argv[i])) {
@@ -218,6 +219,8 @@ int main(int argc, char** argv) {
             sscanf(argv[i+1], "%lu", &post_price_time);
         } else if (!strcmp("--trigger-delta", argv[i])) {
             sscanf(argv[i+1], "%lf", &trigger_delta);
+        } else if (!strcmp("--validate-files", argv[i])) {
+            validate_files = true;
         }
     }
 
@@ -232,10 +235,18 @@ int main(int argc, char** argv) {
         string* vec_symbol_date_str = NULL;
         u64 vec_symbol_date_str_capacity = 0;
         vec_symbol_date_str = string_split(&vec_filename[i], '.', &vec_symbol_date_str_capacity);
+        if (vec_symbol_date_str_capacity < 2) {
+            printf("Error Invalid Filename: %s\n", vec_filename[i].str);
+            return 0;
+        }
         
         string* vec_date_str = NULL;
         u64 vec_date_str_capacity = 0;
         vec_date_str = string_split(&vec_symbol_date_str[vec_symbol_date_str_capacity-2], '_', &vec_date_str_capacity);
+        if (vec_date_str_capacity < 2) {
+            printf("Error Invalid Filename (missing date): %s\n", vec_filename[i].str);
+            return 0;
+        }
         string* date_str = &vec_date_str[vec_symbol_date_str_capacity-1];
 
         u64 file_timestamp = parse_date(date_str->str);
@@ -266,6 +277,18 @@ int main(int argc, char** argv) {
         }
         string_set(&vec_path[i], new_path);
         free(new_path);
+    }
+
+    if (validate_files) {
+        time_t start_time = time(NULL);
+        for (u64 i = 0; i < count_paths; i++) {
+            i32 result = validate_file(vec_path[i].str);
+            if (result < 0) {
+                remove(vec_path[i].str);
+            }
+            print_progress_bar(i+1, count_paths, start_time);
+        }
+        return 0;
     }
 
     pthread_t* threads = malloc(sizeof(pthread_t) * count_paths);

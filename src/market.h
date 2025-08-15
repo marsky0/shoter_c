@@ -12,5 +12,6 @@
 #define MARKET_H
 
 TradesArray read_hdf5(char* path);
+i32 validate_file(char* path);
 
 #endif

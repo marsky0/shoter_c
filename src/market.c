@@ -46,3 +46,48 @@ TradesArray read_hdf5(char* path) {
 
     return trades_array;
 }
+
+i32 validate_file(char* path) {
+    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+
+	hid_t fid = H5Fopen(path, H5F_ACC_RDONLY, H5P_DEFAULT);
+	if (fid < 0) {
+		printf("Error Open File: %s \n", path);
+		return -1; 
+	}
+
+	const char* datasets[] = {"id", "timestamp", "price", "quantity", "is_market"};
+	const H5T_class_t expected_types[] = {H5T_INTEGER, H5T_INTEGER, H5T_FLOAT, H5T_FLOAT, H5T_ENUM};
+	size_t count = sizeof(datasets) / sizeof(datasets[0]);
+
+	for (size_t i = 0; i < count; i++) {
+        if (H5Lexists(fid, datasets[i], H5P_DEFAULT) <= 0) {
+            printf("Error Missing Dataset: %s, path: %s \n", datasets[i], path);
+            H5Fclose(fid);
+            return -1;
+        }
+
+        hsize_t dims[1];
+        H5T_class_t class_id;
+        size_t type_size;
+        if (H5LTget_dataset_info(fid, datasets[i], dims, &class_id, &type_size) < 0) {
+            printf("Error Corrupted Dataset: %s, path: %s \n", datasets[i], path);
+            H5Fclose(fid);
+            return -1;
+        }
+
+        if (class_id != expected_types[i]) {
+            printf("Error Invalid Type: %s, path: %s \n", datasets[i], path);
+            H5Fclose(fid);
+            return -1;
+        }
+
+        if (dims[0] == 0) {
+            printf("Error Empty Dataset: %s, path:%s \n", datasets[i], path);
+            H5Fclose(fid);
+            return -1;
+        }
+    }
+	H5Fclose(fid);
+	return 0;
+}
