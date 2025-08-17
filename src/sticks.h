@@ -27,6 +27,9 @@ typedef struct StickData {
     f64 start_price;
     f64 peak_price;
     f64 post_price;
+    f64 delta_15s;
+    f64 delta_1m;
+    f64 delta_5m;
 } StickData;
 
 typedef struct StickDataArray {

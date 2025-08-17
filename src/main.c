@@ -145,34 +145,64 @@ StickDataArray analysis(string* path, u64 interval, u64 post_price_time, f64 tri
 
 	u64 post_count_sticks = post_price_time / interval;
 	u64 max_sticks = sticks.length;
+    u64 count_5m = 300000/interval;
+    u64 count_1m = 60000/interval;
+    u64 count_15s = 15000/interval;
 
     for (u64 i=0; i < sticks.length; i++) {
-        Stick *s = &sticks.sticks[i];
+        Stick* s = &sticks.sticks[i];
 
-        if (data.capacity - data.length <= 0) {
+        if (data.length >= data.capacity) {
             data.capacity += 100;
             data.data = realloc(data.data, sizeof(StickData) * data.capacity);
         }
 
-        if (i <= 0 || i >= (max_sticks-1) - post_count_sticks) {
+        if (i < count_5m || i >= (max_sticks-1) - post_count_sticks) {
             continue;
         }
 
         f64 delta = (s->high - s->low) / s->low * 100.0;
         if (delta >= trigger_delta) {
+            f64 pmax_15s = s->avg;
+            f64 pmin_15s = s->avg;
+            f64 pmax_1m = s->avg;
+            f64 pmin_1m = s->avg;
+            f64 pmax_5m = s->avg;
+            f64 pmin_5m = s->avg;
+
+            for (u64 j=1000/interval; j < i; j++) {
+                Stick* sj = &sticks.sticks[i-j];
+                if (j < count_15s) {
+                    if (sj->high > pmax_15s) pmax_15s = sj->high;
+                    if (sj->low < pmin_15s) pmin_15s = sj->low;
+                }
+                if (j < count_1m) {
+                    if (sj->high > pmax_1m) pmax_1m = sj->high;
+                    if (sj->low < pmin_1m) pmin_1m = sj->low;
+                }
+                if (j < count_5m) {
+                    if (sj->high > pmax_5m) pmax_5m = sj->high;
+                    if (sj->low < pmin_5m) pmin_5m = sj->low;
+                }
+            }
+
+            f64 delta_15s = (pmax_15s-pmin_15s)/pmin_15s*100.0;
+            f64 delta_1m = (pmax_1m-pmin_1m)/pmin_1m*100.0;
+            f64 delta_5m = (pmax_5m-pmin_5m)/pmin_5m*100.0;
+
+            data.data[data.length].symbol = symbol;
+            data.data[data.length].timestamp = s->time;
             if (sticks.sticks[i - 1].avg < s->avg) {
-                data.data[data.length].symbol = symbol;
-                data.data[data.length].timestamp = s->time;
                 data.data[data.length].start_price = sticks.sticks[i-1].low;
                 data.data[data.length].peak_price = s->high;
-                data.data[data.length].post_price = sticks.sticks[i+post_count_sticks].avg;
             } else {
-                data.data[data.length].symbol = symbol;
-                data.data[data.length].timestamp = s->time;
                 data.data[data.length].start_price = sticks.sticks[i-1].high;
                 data.data[data.length].peak_price = s->low;
-                data.data[data.length].post_price = sticks.sticks[i+post_count_sticks].avg;
             }
+            data.data[data.length].post_price = sticks.sticks[i+post_count_sticks].avg;
+            data.data[data.length].delta_15s = delta_15s;
+            data.data[data.length].delta_1m = delta_1m;
+            data.data[data.length].delta_5m = delta_5m;
             data.length++;
         }
 
@@ -315,17 +345,20 @@ int main(int argc, char** argv) {
     }
 
     FILE *file = fopen("data.csv", "w");
-    fprintf(file, "symbol,timestamp,start_price,peak_price,post_price\n");
+    fprintf(file, "symbol,timestamp,start_price,peak_price,post_price,delta_15s,delta_1m,delta_5m\n");
 
     for (u64 i = 0; i < count_paths; i++) {
         StickDataArray* sda = &targs[i].result;
         for (u64 k = 0; k < sda->length; k++) {
-            fprintf(file, "%s,%lu,%.18lf,%.18lf,%.18lf\n",
+            fprintf(file, "%s,%lu,%.18lf,%.18lf,%.18lf,%.2lf,%.2lf,%.2lf\n",
                 sda->data[k].symbol.str,
                 sda->data[k].timestamp,
                 sda->data[k].start_price,
                 sda->data[k].peak_price,
-                sda->data[k].post_price
+                sda->data[k].post_price,
+                sda->data[k].delta_15s,
+                sda->data[k].delta_1m,
+                sda->data[k].delta_5m
             );
         }
         free(sda->data);
