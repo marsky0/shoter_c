@@ -1,6 +1,6 @@
 #include "sticks.h"
 
-void sticks_generator_new_event(SticksGenerator* sg, StickArray* sa, Trade* t, u64 realloc_size) {
+void sticks_generator_new_event(SticksGenerator* sg, StickArray* sa, Trade* t) {
 	u64 index = t->timestamp / sg->interval;
 
 	if (sg->temp_stick.time == 0) {
@@ -23,10 +23,11 @@ void sticks_generator_new_event(SticksGenerator* sg, StickArray* sa, Trade* t, u
 		if (sg->temp_stick.time < index) {
             u64 capacity = index - sg->temp_stick.time;
             if (sa->capacity - sa->length <= capacity+1) {
-                sa->sticks = realloc(sa->sticks, sizeof(Stick)*(sa->capacity + capacity+realloc_size) );
-                sa->capacity += capacity+realloc_size;
+                sa->sticks = realloc(sa->sticks, sizeof(Stick)*(sa->capacity * 2) );
+                sa->capacity *= 2;
             }
 			
+            /*
             u64 base_time = (sg->temp_stick.time + 1) * sg->interval;
 			for (i32 i=0; i < capacity-1; i++) {
 				Stick *stick = &sa->sticks[sa->length + i];
@@ -36,6 +37,7 @@ void sticks_generator_new_event(SticksGenerator* sg, StickArray* sa, Trade* t, u
                 stick->trades_buy = stick->trades_sell = 0;
 			}
             sa->length += capacity-1;
+            */
 
 			Stick *last = &sa->sticks[sa->length];
             last->time = (sg->temp_stick.time + 1) * sg->interval;

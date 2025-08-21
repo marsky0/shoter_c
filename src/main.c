@@ -134,7 +134,7 @@ StickDataArray analysis(string* path, u64 interval, u64 post_price_time, f64 tri
 	sticks.sticks = (Stick*)malloc(sizeof(Stick)*sticks.capacity);
 
     for (u64 i = 0; i < ta.capacity; i++) {
-        sticks_generator_new_event(&sticks_generator, &sticks, &ta.trades[i], sticks.capacity);
+        sticks_generator_new_event(&sticks_generator, &sticks, &ta.trades[i]);
     }
     free(ta.trades);
 
@@ -153,11 +153,11 @@ StickDataArray analysis(string* path, u64 interval, u64 post_price_time, f64 tri
         Stick* s = &sticks.sticks[i];
 
         if (data.length >= data.capacity) {
-            data.capacity += 100;
+            data.capacity *= 2;
             data.data = realloc(data.data, sizeof(StickData) * data.capacity);
         }
 
-        if (i < count_5m || i >= (max_sticks-1) - post_count_sticks) {
+        if (s->time - sticks.sticks[0].time < count_5m * interval || i >= (max_sticks-1) - post_count_sticks) {
             continue;
         }
 
@@ -170,17 +170,18 @@ StickDataArray analysis(string* path, u64 interval, u64 post_price_time, f64 tri
             f64 pmax_5m = s->avg;
             f64 pmin_5m = s->avg;
 
-            for (u64 j=1000/interval; j < i; j++) {
+            for (u64 j=1; j <= i; j++) {
                 Stick* sj = &sticks.sticks[i-j];
-                if (j < count_15s) {
+
+                if (s->time - sj->time <= count_15s * interval) {
                     if (sj->high > pmax_15s) pmax_15s = sj->high;
                     if (sj->low < pmin_15s) pmin_15s = sj->low;
                 }
-                if (j < count_1m) {
+                if (s->time - sj->time <= count_1m * interval) {
                     if (sj->high > pmax_1m) pmax_1m = sj->high;
                     if (sj->low < pmin_1m) pmin_1m = sj->low;
                 }
-                if (j < count_5m) {
+                if (s->time - sj->time <= count_5m * interval) {
                     if (sj->high > pmax_5m) pmax_5m = sj->high;
                     if (sj->low < pmin_5m) pmin_5m = sj->low;
                 }
@@ -199,7 +200,11 @@ StickDataArray analysis(string* path, u64 interval, u64 post_price_time, f64 tri
                 data.data[data.length].start_price = sticks.sticks[i-1].high;
                 data.data[data.length].peak_price = s->low;
             }
-            data.data[data.length].post_price = sticks.sticks[i+post_count_sticks].avg;
+            for (u64 j=i; j <= i+post_count_sticks; j++) {
+                if (sticks.sticks[j].time - s->time <= post_price_time)
+                    data.data[data.length].post_price = sticks.sticks[j].avg;
+                else break;
+            }
             data.data[data.length].delta_15s = delta_15s;
             data.data[data.length].delta_1m = delta_1m;
             data.data[data.length].delta_5m = delta_5m;

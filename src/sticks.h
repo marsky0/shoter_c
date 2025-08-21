@@ -43,6 +43,6 @@ typedef struct SticksGenerator {
 	Stick temp_stick;
 } SticksGenerator;
 
-void sticks_generator_new_event(SticksGenerator* sg, StickArray* sa, Trade* t, u64 realloc_size);
+void sticks_generator_new_event(SticksGenerator* sg, StickArray* sa, Trade* t);
 
 #endif
