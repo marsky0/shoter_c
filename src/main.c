@@ -21,20 +21,20 @@ typedef struct ThreadArgs {
 } ThreadArgs;
 
 void print_progress_bar(unsigned long done, unsigned long total, time_t start_time) {
-    int bar_width = 50;
+    i32 bar_width = 50;
 
-    float progress = (float)done / total;
-    int pos = (int)(bar_width * progress);
+    f32 progress = (f32)done / total;
+    i32 pos = (i32)(bar_width * progress);
 
     time_t now = time(NULL);
     time_t elapsed = now - start_time;
 
-    int hours = elapsed / 3600;
-    int minutes = (elapsed % 3600) / 60;
-    int seconds = elapsed % 60;
+    i32 hours = elapsed / 3600;
+    i32 minutes = (elapsed % 3600) / 60;
+    i32 seconds = elapsed % 60;
 
     printf("%02d:%02d:%02d [", hours, minutes, seconds);
-    for (int i = 0; i < bar_width; ++i) {
+    for (i32 i = 0; i < bar_width; ++i) {
         if (i < pos) printf("#");
         else printf("-");
     }
