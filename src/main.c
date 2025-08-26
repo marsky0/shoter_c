@@ -191,7 +191,7 @@ StickDataArray analysis(string* path, u64 interval, u64 post_price_time, f64 tri
             f64 delta_1m = (pmax_1m-pmin_1m)/pmin_1m*100.0;
             f64 delta_5m = (pmax_5m-pmin_5m)/pmin_5m*100.0;
 
-            data.data[data.length].symbol = symbol;
+            data.data[data.length].symbol = string_new(symbol.str);
             data.data[data.length].timestamp = s->time;
             if (sticks.sticks[i - 1].avg < s->avg) {
                 data.data[data.length].start_price = sticks.sticks[i-1].low;
@@ -213,6 +213,7 @@ StickDataArray analysis(string* path, u64 interval, u64 post_price_time, f64 tri
 
     }
     free(sticks.sticks);
+    string_free(&symbol);
 
     return data;
 }
@@ -272,7 +273,8 @@ int main(int argc, char** argv) {
         vec_symbol_date_str = string_split(&vec_filename[i], '.', &vec_symbol_date_str_capacity);
         if (vec_symbol_date_str_capacity < 2) {
             printf("Error Invalid Filename: %s\n", vec_filename[i].str);
-            return 0;
+            string_vec_free(vec_symbol_date_str, vec_symbol_date_str_capacity);
+            return -1;
         }
         
         string* vec_date_str = NULL;
@@ -280,7 +282,9 @@ int main(int argc, char** argv) {
         vec_date_str = string_split(&vec_symbol_date_str[vec_symbol_date_str_capacity-2], '_', &vec_date_str_capacity);
         if (vec_date_str_capacity < 2) {
             printf("Error Invalid Filename (missing date): %s\n", vec_filename[i].str);
-            return 0;
+            string_vec_free(vec_symbol_date_str, vec_symbol_date_str_capacity);
+            string_vec_free(vec_date_str, vec_date_str_capacity);
+            return -1;
         }
         string* date_str = &vec_date_str[vec_symbol_date_str_capacity-1];
 
@@ -290,6 +294,9 @@ int main(int argc, char** argv) {
             vec_path[count_paths] = string_new(vec_filename[i].str);
             count_paths++;
         }
+
+        string_vec_free(vec_symbol_date_str, vec_symbol_date_str_capacity);
+        string_vec_free(vec_date_str, vec_date_str_capacity);
     }
     string_vec_free(vec_filename, count_files);
 
@@ -365,13 +372,17 @@ int main(int argc, char** argv) {
                 sda->data[k].delta_1m,
                 sda->data[k].delta_5m
             );
+            string_free(&sda->data[k].symbol);
         }
         free(sda->data);
+        string_free(&targs[i].path);
     }
     fclose(file);
 
     free(threads);
     free(targs);
+    string_free(&path_read_symbols);
+    string_free(&file_type);
     string_vec_free(vec_path, count_paths);
     
     return 0;

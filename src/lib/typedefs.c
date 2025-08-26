@@ -26,39 +26,50 @@ string string_new(char* c) {
 }
 
 string* string_split(string* str, char delim, u64* count) {
-	string* vec = NULL;
-	*count = 0;
+    string* vec = NULL;
+    *count = 0;
 
-	u64 icount = 0;
-	u64 ichar = 0;
+    u64 icount = 0;
+    u64 ichar = 0;
 
-	char* tmp_str = calloc(str->capacity, sizeof(char));
-	if (tmp_str == NULL) return NULL;
+    char* tmp_str = calloc(str->capacity, sizeof(char));
+    if (tmp_str == NULL) return NULL;
 
-	for (u64 i=0; i <= str->length; i++) {
-		if ((str->str[i] == delim && ichar > 0) || (str->str[i] == '\0' && ichar > 0)) {
-			tmp_str[ichar] = '\0';	
-			
-			vec = realloc(vec, sizeof(string)*(icount+1));
-			if (vec == NULL) return NULL;
-			vec[icount].str = NULL;
-			vec[icount].length = 0;
-			vec[icount].capacity = 0;
-			
-			string_set(&vec[icount], tmp_str);
+    for (u64 i = 0; i <= str->length; i++) {
+        if ((str->str[i] == delim && ichar > 0) || (str->str[i] == '\0' && ichar > 0)) {
+            tmp_str[ichar] = '\0';
 
-			memset(tmp_str, 0, str->length);
-			ichar = 0;
-			icount++;
-		} else if (str->str[i] != delim) {
-			tmp_str[ichar] = str->str[i];
-			ichar++;
-		}
-	}
-	if (icount == 0) return NULL;
+            string* tmp = realloc(vec, sizeof(string) * (icount + 1));
+            if (tmp == NULL) {
+            	for (u64 i=0; i < icount; i++) {
+        			string_free(&vec[i]);
+    			}
+    			free(vec);
+                free(tmp_str);
+                return NULL;
+            }
+            vec = tmp;
 
-	*count = icount;
-	return vec;
+            vec[icount].str = NULL;
+            vec[icount].length = 0;
+            vec[icount].capacity = 0;
+
+            string_set(&vec[icount], tmp_str);
+
+            memset(tmp_str, 0, str->capacity);
+            ichar = 0;
+            icount++;
+        } else if (str->str[i] != delim) {
+            tmp_str[ichar++] = str->str[i];
+        }
+    }
+
+    free(tmp_str);
+
+    if (icount == 0) return NULL;
+
+    *count = icount;
+    return vec;
 }
 
 i32 compare_strings(const void* a, const void* b) {
